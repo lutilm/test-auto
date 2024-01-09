@@ -1,0 +1,39 @@
+name: Convert XML to JSON
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  convert-xml-to-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xmlstarlet
+
+      - name: Download XML file
+        run: |
+          curl -o cyberattacks_news.xml https://raw.githubusercontent.com/Casualtek/Cyberwatch/main/cyberattacks_news.xml
+
+      - name: Convert XML to JSON
+        run: |
+          xmlstarlet fo -t --omit-decl -o output.json cyberattacks_news.xml
+
+      - name: Display converted JSON
+        run: |
+          cat output.json
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add output.json
+          git commit -m "Convert XML to JSON"
+          git push
