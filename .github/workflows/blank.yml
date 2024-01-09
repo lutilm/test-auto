@@ -24,7 +24,7 @@ jobs:
 
       - name: Convert XML to JSON
         run: |
-          xmlstarlet fo -t --omit-decl -o output.json cyberattacks_news.xml
+          xmlstarlet sel -t -m "//item" -v "title" -o "[SEP]" -v "guid" -o '[SEP]' -v "pubDate" -n cyberattacks_news.xml | node -e "const readline = require('readline'); const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false }); let result = []; rl.on('line', line => {   const [title, link, date] = line.split('[SEP]').slice(0, 3);  result.push({ title: String(title).trim(), link: String(link).trim(), date:new Date( String(date).trim()).toISOString() }); });rl.on('close', () => {  console.log(JSON.stringify(result, null, 2));});" > output.json
 
       - name: Display converted JSON
         run: |
