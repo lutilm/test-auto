@@ -17,7 +17,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y xmlstarlet
-
+          npm install rss
       - name: Download XML file
         run: |
           curl -o cyberattacks_news.xml https://raw.githubusercontent.com/Casualtek/Cyberwatch/main/cyberattacks_news.xml
@@ -25,10 +25,14 @@ jobs:
       - name: Convert XML to JSON
         run: |
           xmlstarlet sel -t -m "//item" -v "title" -o "[SEP]" -v "guid" -o '[SEP]' -v "pubDate" -n cyberattacks_news.xml | node -e "const readline = require('readline'); const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false }); let result = []; rl.on('line', line => {   const [title, link, date] = line.split('[SEP]').slice(0, 3);  result.push({ title: String(title).trim(), link: String(link).trim(), date:new Date( String(date).trim()).toISOString() }); });rl.on('close', () => {  console.log(JSON.stringify(result, null, 2));});" > output.json
+          
+          node -e "const RSS = require('rss'); const fs = require('fs'); const items = JSON.parse(fs.readFileSync('output.json', 'utf-8')); const feed = new RSS({ title: 'My RSS Feed', description: 'Description of my RSS Feed', feed_url: 'https://example.com/rss', site_url: 'https://example.com' }); items.forEach(item => { feed.item({ title: item.title, url: item.link, date: new Date(item.date) }); }); const rssOutput = feed.xml({ indent: true }); fs.writeFileSync('output.rss', rssOutput); console.log('RSS feed generated successfully.');"
+
       - name: Commit changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add output.json
+          git add output.rss
           git commit -m "Convert XML to JSON"
           git push
