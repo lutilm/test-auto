@@ -1,0 +1,39 @@
+name: Fetch HPE Security Bulletins
+
+on:
+  schedule:
+    - cron: '0,7,12,20 0 * * *'  
+  workflow_dispatch:     # Allows manual trigger
+
+jobs:
+  fetch-hpe-page:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Install Puppeteer and curl.js
+      run: |
+        npm install puppeteer
+        wget https://raw.githubusercontent.com/gnadelwartz/puppet-curl/master/curl.js
+        chmod +x curl.js
+
+    - name: Fetch HPE Security Bulletins HTML
+      run: |
+        node curl.js --wait 10 --output hpe.html "https://support.hpe.com/connect/s/securitybulletinlibrary?language=en_US#sort=%40hpescuniversaldate%20descending&numberOfResults=50&f:@kmdocsecuritybulletin=[4000005,4000004]&f:@kmdoclanguagecode=[cv1871440]&f:@kmdoccvesecurity=[Critical,High]"
+
+    - name: Commit and Push HTML file
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add hpe.html
+        git commit -m "Update HPE security bulletins HTML"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
