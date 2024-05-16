@@ -8,7 +8,7 @@ async function fetchPage(url, waitTime, outputFile) {
     await page.goto(url, { waitUntil: 'networkidle2' });
 
     // Wait for the specified number of seconds
-    await page.waitForTimeout(waitTime * 1000);
+    await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
 
     const htmlContent = await page.content();
     fs.writeFileSync(outputFile, htmlContent);
