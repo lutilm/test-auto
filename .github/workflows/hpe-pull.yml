@@ -30,10 +30,10 @@ jobs:
 
     - name: Commit and Push HTML file
       run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git add hpe.html
         git commit -m "Update HPE security bulletins HTML"
         git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #env:
+      #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
